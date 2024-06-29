@@ -8,8 +8,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() async {
-  Get.lazyPut(()=>ExpenseController())
-  ;
+  Get.lazyPut(() => ExpenseController());
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
   runApp(ExpenseTrackerApp());
@@ -20,6 +19,7 @@ class ExpenseTrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Expense Tracker',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

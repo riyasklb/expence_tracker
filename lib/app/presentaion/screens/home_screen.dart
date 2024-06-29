@@ -1,25 +1,28 @@
 import 'package:expence_tracker/app/presentaion/controllers/expence_controllers.dart';
+import 'package:expence_tracker/app/presentaion/screens/add_expences_page.dart';
 import 'package:expence_tracker/app/presentaion/screens/users_expence_summery.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 
 class ExpenseListScreen extends StatelessWidget {
   final ExpenseController expenseController = Get.put(ExpenseController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Expense Tracker'),
+    return Scaffold(backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.white,
+        title: Text(
+          'Track Your Expense',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.cancel),
-            onPressed: () {
-              expenseController.cancelNotifications();
-              Get.snackbar('Notifications', 'Notifications canceled');
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.cancel),
+          //   onPressed: () {
+          //     expenseController.cancelNotifications();
+          //     Get.snackbar('Notifications', 'Notifications canceled');
+          //   },
+          // ),
           IconButton(
             icon: Icon(Icons.bar_chart),
             onPressed: () {
@@ -31,111 +34,135 @@ class ExpenseListScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: Obx(
-              () => ListView.builder(
-                itemCount: expenseController.expenses.length,
-                itemBuilder: (ctx, index) {
-                  final expense = expenseController.expenses[index];
-                  return ListTile(
-                    title: Text(expense.description),
-                    subtitle: Text(
-                        '${expense.type} - ${expense.date.toIso8601String()}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('\$${expense.amount.toStringAsFixed(2)}'),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () =>
-                              expenseController.deleteExpense(expense.id!),
+            child:Obx(
+  () {
+    final expenses = expenseController.expenses.toList();
+    expenses.sort((a, b) => b.date.compareTo(a.date)); // Sort by date descending
+
+    return expenses.isEmpty
+        ? Center(
+            child: Text('No expenses yet.'),
+          )
+        : ListView.builder(
+            physics: BouncingScrollPhysics(),
+            itemCount: expenses.length,
+            itemBuilder: (ctx, index) {
+              final expense = expenses[index];
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Dismissible(
+                  key: Key(expense.id.toString()),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                    ),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    expenseController.deleteExpense(expense.id!);
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Expense deleted')),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            ),
+                    child: ListTile(
+                      title: Text(
+                        expense.type,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${expense.description}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      trailing: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${expense.date.day}/${expense.date.month}/${expense.date.year}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 10,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '\$${expense.amount.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+  },
+),
+
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () => _showAddExpenseDialog(context),
-              child: Text('Add Expense'),
+            child:InkWell(onTap: (){Get.to(AddExpensePage());},
+              child: Container(
+                    alignment: Alignment.center,
+                    height: 45,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3), // changes position of shadow
+                        ),
+                      ],
+                      border: Border.all(
+                        width: 1.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                    child: Text(
+                      'Add Expense',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
             ),
+            
+            
+           
           ),
         ],
       ),
     );
   }
 
-  void _showAddExpenseDialog(BuildContext context) {
-    final descriptionController = TextEditingController();
-    final amountController = TextEditingController();
-    DateTime selectedDate = DateTime.now();
-    String selectedType = 'Other';
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text('Add Expense'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-              TextField(
-                controller: amountController,
-                decoration: InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 10),
-              DropdownButton<String>(
-                value: selectedType,
-                onChanged: (newValue) {
-                  selectedType = newValue!;
-                },
-                items: <String>['Food', 'Transport', 'Entertainment', 'Other']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (pickedDate != null) {
-                    selectedDate = pickedDate;
-                  }
-                },
-                child: Text('Select Date'),
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                final description = descriptionController.text;
-                final amount = double.parse(amountController.text);
-                expenseController.addExpense(
-                    description, amount, selectedDate, selectedType);
-                Navigator.of(ctx).pop();
-              },
-              child: Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+ 
 }
