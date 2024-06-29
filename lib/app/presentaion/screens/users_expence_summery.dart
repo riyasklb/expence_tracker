@@ -1,4 +1,4 @@
-import 'package:expence_tracker/app/db/expence_db.dart';
+import 'package:expence_tracker/app/domain/db/expence_db.dart';
 import 'package:flutter/material.dart';
 
 
@@ -75,9 +75,11 @@ class _ExpenseSummaryScreenState extends State<ExpenseSummaryScreen> {
               itemCount: summaries.length,
               itemBuilder: (ctx, index) {
                 final summary = summaries[index];
-                return ListTile(
-                  title: Text(summary['type']),
-                  trailing: Text('\$${summary['totalAmount'].toStringAsFixed(2)}'),
+                return Card(
+                  child: ListTile(
+                    title: Text(summary['type']),
+                    trailing: Text('\$${summary['totalAmount'].toStringAsFixed(2)}'),
+                  ),
                 );
               },
             ),

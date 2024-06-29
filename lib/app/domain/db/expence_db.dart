@@ -1,4 +1,4 @@
-import 'package:expence_tracker/app/model.dart/expence_model.dart';
+import 'package:expence_tracker/app/data/model.dart/expence_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
