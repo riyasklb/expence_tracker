@@ -1,11 +1,13 @@
-import 'package:get/get.dart';
-import 'package:expence_tracker/app/domain/db/expence_db.dart';
 import 'package:expence_tracker/app/data/model.dart/expence_model.dart';
+import 'package:expence_tracker/app/domain/db/expence_db.dart';
 import 'package:expence_tracker/app/domain/notification/notification_service.dart';
+import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 class ExpenseController extends GetxController {
   var expenses = <Expense>[].obs;
   final NotificationService notificationService = NotificationService();
+ // DatabaseHelper databaseHelper = DatabaseHelper.instance;
   RxString selectedType = 'Other'.obs;
   Rx<DateTime> selectedDate = DateTime.now().obs;
 
@@ -17,8 +19,8 @@ class ExpenseController extends GetxController {
     fetchExpenses();
   }
 
-  void fetchExpenses() async {
-    final result = await DatabaseHelper.instance.readAllExpenses();
+   fetchExpenses() async {
+    final result = await  DatabaseHelper.instance.readAllExpenses();
     expenses.assignAll(result);
   }
 
@@ -29,12 +31,12 @@ class ExpenseController extends GetxController {
       date: selectedDate.value,
       type: selectedType.value,
     );
-    await DatabaseHelper.instance.create(newExpense);
+    await  DatabaseHelper.instance.create(newExpense);
     fetchExpenses();
   }
 
   void deleteExpense(int id) async {
-    await DatabaseHelper.instance.delete(id);
+    await  DatabaseHelper.instance.delete(id);
     fetchExpenses();
   }
 
@@ -49,6 +51,9 @@ class ExpenseController extends GetxController {
   void updateSelectedDate(DateTime newDate) {
     selectedDate.value = newDate;
   }
-
+  void updateExpense(Expense updatedExpense) async {
+  await DatabaseHelper.instance.update(updatedExpense);
+  fetchExpenses();
+}
 
 }

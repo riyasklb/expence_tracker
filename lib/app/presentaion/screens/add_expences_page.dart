@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:expence_tracker/app/presentaion/controllers/expence_controllers.dart';
+import 'package:expence_tracker/app/data/model.dart/expence_model.dart';
 
 class AddExpensePage extends StatelessWidget {
   final ExpenseController expenseController = Get.put(ExpenseController());
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+  final Expense? expense;
+
+  AddExpensePage({this.expense});
 
   @override
   Widget build(BuildContext context) {
+    if (expense != null) {
+      descriptionController.text = expense!.description;
+      amountController.text = expense!.amount.toString();
+      expenseController.selectedType.value = expense!.type;
+      expenseController.selectedDate.value = expense!.date;
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
-          'Expense',
+          expense != null ? 'Edit Expense' : 'Add Expense',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
@@ -40,12 +51,16 @@ class AddExpensePage extends StatelessWidget {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              for (String value
-                                  in ['Food', 'Transport', 'Entertainment', 'Other'])
+                              for (String value in [
+                                'Food',
+                                'Transport',
+                                'Entertainment',
+                                'Other'
+                              ])
                                 ListTile(
                                   title: Text(value),
                                   onTap: () {
-                                    Get.back(result: value); // Use Get for navigation
+                                    Get.back(result: value);
                                   },
                                 ),
                             ],
@@ -54,24 +69,22 @@ class AddExpensePage extends StatelessWidget {
                       },
                     );
                     if (newValue != null) {
-                      controller.updateSelectedType(newValue); // Update controller state
+                      controller.updateSelectedType(newValue);
                     }
                   },
                   child: Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(controller.selectedType.value), // Display selected value
-                      Icon(Icons.arrow_drop_down,
-                          color: Colors.black), // Dropdown icon
-                    ],
-                  )),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(controller.selectedType.value),
+                          Icon(Icons.arrow_drop_down, color: Colors.black),
+                        ],
+                      )),
                 ),
               ),
               SizedBox(height: 16.0),
               Container(
                 height: 45,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                 child: TextFormField(
                   controller: descriptionController,
                   decoration: InputDecoration(
@@ -96,8 +109,7 @@ class AddExpensePage extends StatelessWidget {
               SizedBox(height: 16.0),
               Container(
                 height: 45,
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                 child: TextFormField(
                   keyboardType: TextInputType.number,
                   controller: amountController,
@@ -130,7 +142,7 @@ class AddExpensePage extends StatelessWidget {
                     lastDate: DateTime(2101),
                   );
                   if (pickedDate != null) {
-                    controller.updateSelectedDate(pickedDate); // Update controller state
+                    controller.updateSelectedDate(pickedDate);
                   }
                 },
                 child: Container(
@@ -141,31 +153,44 @@ class AddExpensePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Selected Date:',
-                        style:
-                            TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        '${controller.selectedDate.value.day}-${controller.selectedDate.value.month}-${controller.selectedDate.value.year}',
-                        style:
-                            TextStyle(fontSize: 15, fontWeight: FontWeight.w500,color: Colors.black),
-                      ),
-                    ],
-                  )),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Selected Date:',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            '${controller.selectedDate.value.day}-${controller.selectedDate.value.month}-${controller.selectedDate.value.year}',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black),
+                          ),
+                        ],
+                      )),
                 ),
               ),
               SizedBox(height: 16.0),
               InkWell(
                 onTap: () {
                   final description = descriptionController.text;
-                  final amount =
-                      double.tryParse(amountController.text) ?? 0.0;
-                  controller.addExpense(description, amount);
+                  final amount = double.tryParse(amountController.text) ?? 0.0;
 
-                  Get.back(); // Close the page using GetX
+                  if (expense != null) {
+                    controller.updateExpense(
+                      expense!.copyWith(
+                        description: description,
+                        amount: amount,
+                        date: controller.selectedDate.value,
+                        type: controller.selectedType.value,
+                      ),
+                    );
+                  } else {
+                    controller.addExpense(description, amount);
+                  }
+
+                  Get.back();
                 },
                 child: Container(
                   alignment: Alignment.center,
@@ -179,7 +204,7 @@ class AddExpensePage extends StatelessWidget {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3), // changes position of shadow
+                        offset: Offset(0, 3),
                       ),
                     ],
                     border: Border.all(
@@ -188,7 +213,7 @@ class AddExpensePage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Add Expense',
+                    expense != null ? 'Save Changes' : 'Add Expense',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
