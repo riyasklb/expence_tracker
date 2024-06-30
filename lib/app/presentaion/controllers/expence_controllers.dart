@@ -7,7 +7,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 class ExpenseController extends GetxController {
   var expenses = <Expense>[].obs;
   final NotificationService notificationService = NotificationService();
- // DatabaseHelper databaseHelper = DatabaseHelper.instance;
+
   RxString selectedType = 'Other'.obs;
   Rx<DateTime> selectedDate = DateTime.now().obs;
 

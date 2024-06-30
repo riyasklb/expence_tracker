@@ -91,14 +91,15 @@ Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
   }
 
   Future<int> delete(int id) async {
-    final db = await instance.database;
+  final db = await instance.database;
 
-    return db.delete(
-      'expenses',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
+  return await db.delete(
+    'expenses',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+
 
   Future<List<Expense>> readExpensesByDateRange(DateTime startDate, DateTime endDate) async {
     final db = await instance.database;

@@ -37,44 +37,57 @@ class ExpenseSummaryScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 )),
           ),
-          Expanded(
-            child: Obx(() {
-              final summaries = controller.isWeekly.value
-                  ? controller.weeklySummary
-                  : controller.monthlySummary;
+         Expanded(
+  child: Obx(() {
+    final summaries = controller.isWeekly.value
+        ? controller.weeklySummary
+        : controller.monthlySummary;
 
-              return ListView.builder(
-                itemCount: summaries.length,
-                itemBuilder: (ctx, index) {
-                  final summary = summaries[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        title: Text(summary['type'],   style: TextStyle(fontWeight: FontWeight.w600,fontSize: 14),),
-                        trailing: Text(
-                          '\$${summary['totalAmount'].toStringAsFixed(2)}',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
+    if (summaries.isEmpty) {
+      return Center(
+        child: Text(
+          'No expenses to show.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: summaries.length,
+      itemBuilder: (ctx, index) {
+        final summary = summaries[index];
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: ListTile(
+              title: Text(
+                summary['type'],
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              trailing: Text(
+                '\$${summary['totalAmount'].toStringAsFixed(2)}',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
+        );
+      },
+    );
+  }),
+),
+
         ],
       ),
     );
