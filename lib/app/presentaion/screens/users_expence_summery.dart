@@ -1,9 +1,9 @@
 // lib/app/presentation/screens/expense_summary_screen.dart
-
 import 'package:expence_tracker/app/data/reposities/expence_repository_impl.dart';
 import 'package:expence_tracker/app/domain/use_case/get_expence_summery_by_type.dart';
 import 'package:expence_tracker/app/presentaion/controllers/expence_summary_controller.dart';
- // Import the implementation
+import 'package:expence_tracker/app/presentaion/screens/widgets/constants.dart';
+import 'package:expence_tracker/app/presentaion/screens/widgets/custom_appbar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,7 +11,7 @@ class ExpenseSummaryScreen extends StatelessWidget {
   final ExpenseSummaryController controller = Get.put(
     ExpenseSummaryController(
       getExpensesSummaryByTypeUseCase: GetExpensesSummaryByType(
-        ExpenseRepositoryImpl(), // Pass the repository implementation
+        ExpenseRepositoryImpl(),
       ),
     ),
   );
@@ -19,34 +19,26 @@ class ExpenseSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
+      backgroundColor: kwhite,
+      appBar: CustomAppBar(
+        titleText: 'Expense Summary',
+        actions: [
+          Obx(() => IconButton(
+                icon: Icon(
+                  controller.isWeekly.value
+                      ? Icons.calendar_view_month
+                      : Icons.calendar_view_week,
+                ),
+                onPressed: controller.toggleSummaryType,
+              )),
+        ],
+      ),
       body: Column(
         children: [
           _buildSummaryTitle(),
           _buildSummaryList(),
         ],
       ),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      title: Text(
-        'Expense Summary',
-        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-      ),
-      actions: [
-        Obx(() => IconButton(
-              icon: Icon(
-                controller.isWeekly.value
-                    ? Icons.calendar_view_month
-                    : Icons.calendar_view_week,
-              ),
-              onPressed: controller.toggleSummaryType,
-            )),
-      ],
     );
   }
 
@@ -71,7 +63,7 @@ class ExpenseSummaryScreen extends StatelessWidget {
               : controller.monthlySummary;
 
           if (summaries.isEmpty) {
-            return Center(
+            return const Center(
               child: Text(
                 'No expenses to show.',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
