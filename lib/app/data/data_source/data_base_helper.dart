@@ -2,12 +2,11 @@ import 'package:expence_tracker/app/data/model/expence_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
-
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
   static Database? _database;
 
-  DatabaseHelper._init();
+  DatabaseHelper._privateConstructor();
 
   Future<Database> get database async {
     if (_database != null) return _database!;

@@ -1,47 +1,82 @@
-// import 'package:expence_tracker/app/data/reposities/expence_repository_impl.dart';
-// import 'package:expence_tracker/app/data/repositories/expense_repository_impl.dart';
-// import 'package:expence_tracker/app/domain/use_case/add_expence.dart';
-// import 'package:expence_tracker/app/domain/usecases/add_expense.dart';
-// import 'package:expence_tracker/app/presentaion/controllers/expence_controllers.dart';
-// import 'package:expence_tracker/app/presentation/controllers/expense_controller.dart';
-// import 'package:flutter_test/flutter_test.dart';
-// import 'package:get/get.dart';
+import 'package:expence_tracker/app/data/data_source/data_base_helper.dart';
+import 'package:expence_tracker/app/data/model/expence_model.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-// void main() {
-//   group('ExpenseController', () {
-//     late ExpenseController controller;
-//     late AddExpense addExpenseUseCase;
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-//     setUp(() {
-//       final expenseRepository = ExpenseRepositoryImpl(); // Example repository implementation
-//       addExpenseUseCase = AddExpense(expenseRepository);
-//       controller = ExpenseController(addExpenseUseCase: addExpenseUseCase);
+  late DatabaseHelper dbHelper;
 
-//       // Initialize GetX bindings manually
-//       Get.testMode = true;
-//     });
+  setUpAll(() async {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+    dbHelper = DatabaseHelper.instance; // Use the singleton instance
 
-//     test('Initial state', () {
-//       expect(controller.expenses.isEmpty, true);
-//     });
+    // Initialize database for testing
+    final db = await dbHelper.database;
+    await db.execute('DELETE FROM expenses'); // Clear table before running tests
+  });
 
-//     test('Add expense', () async {
-//       final initialCount = controller.expenses.length;
-//       await controller.addExpense('Test Expense', 100.0);
+  tearDownAll(() async {
+    await dbHelper.close();
+  });
 
-//       expect(controller.expenses.length, initialCount + 1);
-//     });
+  final expense = ExpenseModel(
+    description: 'Test Expense',
+    amount: 10.0,
+    date: DateTime.now(),
+    type: 'Other',
+  );
 
-//     test('Delete expense', () async {
-//       final initialCount = controller.expenses.length;
+  group('DatabaseHelper', () {
+    test('createExpense and readExpense', () async {
+      // Create Expense
+      final id = await dbHelper.createExpense(expense);
+      expect(id, isNonZero);
 
-//       // Assuming you have a way to add an expense for deletion
-//       await controller.addExpense('Expense to delete', 50.0);
-//       final expenseToDelete = controller.expenses.firstWhere((expense) => expense.description == 'Expense to delete');
+      // Read Expense
+      final readExpense = await dbHelper.readExpense(id);
+      expect(readExpense, isNotNull);
+      expect(readExpense?.description, 'Test Expense');
+      expect(readExpense?.amount, 10.0);
+    });
 
-//       await controller.deleteExpense(expenseToDelete.id);
+    test('updateExpense', () async {
+      // Create Expense
+      final id = await dbHelper.createExpense(expense);
 
-//       expect(controller.expenses.length, initialCount);
-//     });
-//   });
-// }
+      // Update Expense
+      final updatedExpense = ExpenseModel(
+        id: id,
+        description: 'Updated Expense',
+        amount: 20.0,
+        date: DateTime.now(),
+        type: 'Food',
+      );
+      final rowsAffected = await dbHelper.updateExpense(updatedExpense);
+      expect(rowsAffected, 1);
+
+      // Read Expense
+      final readExpense = await dbHelper.readExpense(id);
+      expect(readExpense, isNotNull);
+      expect(readExpense?.description, 'Updated Expense');
+      expect(readExpense?.amount, 20.0);
+    });
+
+    test('deleteExpense', () async {
+      // Create Expense
+      final id = await dbHelper.createExpense(expense);
+
+      // Delete Expense
+      final rowsDeleted = await dbHelper.deleteExpense(id);
+      expect(rowsDeleted, 1);
+
+      // Verify Deletion
+      final readExpense = await dbHelper.readExpense(id);
+      expect(readExpense, isNull);
+    });
+
+ 
+  });
+}
