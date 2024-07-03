@@ -58,23 +58,32 @@ This project is licensed under the MIT License
 
 ## Folder Structure
 
-lib/
-├── app/
-│   ├── data/
-│   │   ├── model/
-│   │   │   └── expence_model.dart
-│   │   └── db/
-│   │       └── expence_db.dart
-│   ├── domain/
-│   │   └── controllers/
-│   │       └── expence_controllers.dart
-│   └── presentation/
-│       ├── screens/
-│       │   ├── add_expence_page.dart
-│       │   └── expense_list_screen.dart
-│       │   └── users_expense_summary.dart
-│       └── widgets/
-├── main.dart
+lib
+├── app
+│   ├── data
+│   │   ├── models
+│   │   │   └── expense_model.dart
+│   │   ├── repositories
+│   │   │   └── expense_repository.dart
+│   ├── domain
+│   │   ├── entities
+│   │   │   └── expense_entity.dart
+│   │   ├── repositories
+│   │   │   └── expense_repository.dart
+│   │   ├── usecases
+│   │       ├── add_expense.dart
+│   │       ├── delete_expense.dart
+│   │       ├── get_expenses.dart
+│   │       ├── update_expense.dart
+│   ├── presentation
+│   │   ├── controllers
+│   │   │   └── expense_controller.dart
+│   │   ├── screens
+│   │       ├── add_expense_page.dart
+│   │       ├── expense_list_screen.dart
+│   │       └── expense_summary_screen.dart
+│   └── main.dart
+
 
 
 ## Contact
