@@ -1,11 +1,13 @@
-class Expense {
+// lib/app/domain/entity/expence_entity.dart
+
+class ExpenseEntity {
   final int? id;
   final String description;
   final double amount;
   final DateTime date;
   final String type;
 
-  Expense({
+  ExpenseEntity({
     this.id,
     required this.description,
     required this.amount,
@@ -13,34 +15,15 @@ class Expense {
     required this.type,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'description': description,
-      'amount': amount,
-      'date': date.toIso8601String(),
-      'type': type,
-    };
-  }
-
-  factory Expense.fromMap(Map<String, dynamic> map) {
-    return Expense(
-      id: map['id'],
-      description: map['description'],
-      amount: map['amount'],
-      date: DateTime.parse(map['date']),
-      type: map['type'],
-    );
-  }
-
-  Expense copyWith({
+  // Adding copyWith method
+  ExpenseEntity copyWith({
     int? id,
     String? description,
     double? amount,
     DateTime? date,
     String? type,
   }) {
-    return Expense(
+    return ExpenseEntity(
       id: id ?? this.id,
       description: description ?? this.description,
       amount: amount ?? this.amount,

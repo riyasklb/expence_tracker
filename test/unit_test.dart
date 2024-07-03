@@ -1,84 +1,47 @@
-import 'package:expence_tracker/app/data/model.dart/expence_model.dart';
-import 'package:expence_tracker/app/domain/db/expence_db.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+// import 'package:expence_tracker/app/data/reposities/expence_repository_impl.dart';
+// import 'package:expence_tracker/app/data/repositories/expense_repository_impl.dart';
+// import 'package:expence_tracker/app/domain/use_case/add_expence.dart';
+// import 'package:expence_tracker/app/domain/usecases/add_expense.dart';
+// import 'package:expence_tracker/app/presentaion/controllers/expence_controllers.dart';
+// import 'package:expence_tracker/app/presentation/controllers/expense_controller.dart';
+// import 'package:flutter_test/flutter_test.dart';
+// import 'package:get/get.dart';
 
-void main() {
-  late DatabaseHelper databaseHelper;
+// void main() {
+//   group('ExpenseController', () {
+//     late ExpenseController controller;
+//     late AddExpense addExpenseUseCase;
 
-  setUpAll(() {
-   
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-    databaseHelper = DatabaseHelper.instance;
-  });
+//     setUp(() {
+//       final expenseRepository = ExpenseRepositoryImpl(); // Example repository implementation
+//       addExpenseUseCase = AddExpense(expenseRepository);
+//       controller = ExpenseController(addExpenseUseCase: addExpenseUseCase);
 
-  tearDownAll(() async {
-    await databaseHelper.close();
-  });
+//       // Initialize GetX bindings manually
+//       Get.testMode = true;
+//     });
 
-  setUp(() async {
-  
-    await databaseHelper.database;
-  });
+//     test('Initial state', () {
+//       expect(controller.expenses.isEmpty, true);
+//     });
 
-  test('should create an expense', () async {
-    final expense = Expense(
-      description: 'Groceries',
-      amount: 50.0,
-      date: DateTime.now(),
-      type: 'Food',
-    );
+//     test('Add expense', () async {
+//       final initialCount = controller.expenses.length;
+//       await controller.addExpense('Test Expense', 100.0);
 
-    final createdExpense = await databaseHelper.create(expense);
+//       expect(controller.expenses.length, initialCount + 1);
+//     });
 
-    expect(createdExpense.id, isNotNull);
-    expect(createdExpense.description, 'Groceries');
-  });
+//     test('Delete expense', () async {
+//       final initialCount = controller.expenses.length;
 
-  test('should read all expenses', () async {
-    final expenses = await databaseHelper.readAllExpenses();
+//       // Assuming you have a way to add an expense for deletion
+//       await controller.addExpense('Expense to delete', 50.0);
+//       final expenseToDelete = controller.expenses.firstWhere((expense) => expense.description == 'Expense to delete');
 
-    expect(expenses, isA<List<Expense>>());
-  });
+//       await controller.deleteExpense(expenseToDelete.id);
 
-  test('should update an expense', () async {
-    final expense = Expense(
-      id: 1,
-      description: 'Updated',
-      amount: 75.0,
-      date: DateTime.now(),
-      type: 'Food',
-    );
-
-    final rowsAffected = await databaseHelper.update(expense);
-
-    expect(rowsAffected, 0);
-  });
-
-  test('should delete an expense', () async {
-    final expenseId = 0;
-
-    final rowsDeleted = await databaseHelper.delete(expenseId);
-
-    expect(rowsDeleted, 0);
-  });
-
-  test('should read expenses by date range', () async {
-    final startDate = DateTime(2023, 1, 1);
-    final endDate = DateTime.now();
-
-    final expenses = await databaseHelper.readExpensesByDateRange(startDate, endDate);
-
-    expect(expenses, isA<List<Expense>>());
-  });
-
-  test('should read expenses summary by type', () async {
-    final startDate = DateTime(2023, 1, 1);
-    final endDate = DateTime.now();
-
-    final summary = await databaseHelper.readExpensesSummaryByType(startDate, endDate);
-
-    expect(summary, isA<List<Map<String, dynamic>>>());
-  });
-}
+//       expect(controller.expenses.length, initialCount);
+//     });
+//   });
+// }

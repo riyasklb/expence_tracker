@@ -1,4 +1,4 @@
-import 'package:expence_tracker/app/data/model.dart/expence_model.dart';
+import 'package:expence_tracker/app/data/model/expence_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -15,27 +15,26 @@ class DatabaseHelper {
     return _database!;
   }
 
- Future<Database> _initDB(String filePath) async {
-  final dbPath = await getDatabasesPath();
-  final path = join(dbPath, filePath);
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
 
-  return await openDatabase(
-    path,
-    version: 2,
-    onCreate: _createDB,
-    onUpgrade: _upgradeDB,
-  );
-}
-
-Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
-  if (oldVersion < 2) {
-    await db.execute('ALTER TABLE expenses ADD COLUMN type TEXT NOT NULL DEFAULT "Other"');
+    return await openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
   }
-}
 
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE expenses ADD COLUMN type TEXT NOT NULL DEFAULT "Other"');
+    }
+  }
 
- Future _createDB(Database db, int version) async {
-  await db.execute('''
+  Future _createDB(Database db, int version) async {
+    await db.execute('''
     CREATE TABLE expenses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       description TEXT NOT NULL,
@@ -44,19 +43,15 @@ Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
       type TEXT NOT NULL
     )
     ''');
-}
-
-
-  Future<Expense> create(Expense expense) async {
-    final db = await instance.database;
-
-    final id = await db.insert('expenses', expense.toMap());
-    return expense.copyWith(id: id);
   }
 
-  Future<Expense> readExpense(int id) async {
+  Future<int> createExpense(ExpenseModel expense) async {
     final db = await instance.database;
+    return await db.insert('expenses', expense.toMap());
+  }
 
+  Future<ExpenseModel?> readExpense(int id) async {
+    final db = await instance.database;
     final maps = await db.query(
       'expenses',
       columns: ['id', 'description', 'amount', 'date', 'type'],
@@ -65,24 +60,21 @@ Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     );
 
     if (maps.isNotEmpty) {
-      return Expense.fromMap(maps.first);
+      return ExpenseModel.fromMap(maps.first);
     } else {
-      throw Exception('ID $id not found');
+      return null;
     }
   }
 
-  Future<List<Expense>> readAllExpenses() async {
+  Future<List<ExpenseModel>> readAllExpenses() async {
     final db = await instance.database;
-
     final result = await db.query('expenses');
-
-    return result.map((json) => Expense.fromMap(json)).toList();
+    return result.map((json) => ExpenseModel.fromMap(json)).toList();
   }
 
-  Future<int> update(Expense expense) async {
+  Future<int> updateExpense(ExpenseModel expense) async {
     final db = await instance.database;
-
-    return db.update(
+    return await db.update(
       'expenses',
       expense.toMap(),
       where: 'id = ?',
@@ -90,43 +82,36 @@ Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     );
   }
 
-  Future<int> delete(int id) async {
-  final db = await instance.database;
-
-  return await db.delete(
-    'expenses',
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
-
-
-  Future<List<Expense>> readExpensesByDateRange(DateTime startDate, DateTime endDate) async {
+  Future<int> deleteExpense(int id) async {
     final db = await instance.database;
+    return await db.delete(
+      'expenses',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
+  Future<List<ExpenseModel>> readExpensesByDateRange(DateTime startDate, DateTime endDate) async {
+    final db = await instance.database;
     final result = await db.query(
       'expenses',
       where: 'date >= ? AND date <= ?',
       whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
     );
-
-    return result.map((json) => Expense.fromMap(json)).toList();
+    return result.map((json) => ExpenseModel.fromMap(json)).toList();
   }
 
   Future<List<Map<String, dynamic>>> readExpensesSummaryByType(DateTime startDate, DateTime endDate) async {
     final db = await instance.database;
-
     final result = await db.rawQuery(
       'SELECT type, SUM(amount) as totalAmount FROM expenses WHERE date >= ? AND date <= ? GROUP BY type',
       [startDate.toIso8601String(), endDate.toIso8601String()],
     );
-
     return result;
   }
 
   Future close() async {
     final db = await instance.database;
-
     db.close();
   }
 }
