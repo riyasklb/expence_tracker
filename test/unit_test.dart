@@ -1,4 +1,7 @@
+// test/database_helper_test.dart
+
 import 'package:expence_tracker/app/data/data_source/data_base_helper.dart';
+
 import 'package:expence_tracker/app/data/model/expence_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -77,6 +80,19 @@ void main() {
       expect(readExpense, isNull);
     });
 
+    test('readAllExpenses', () async {
+      // Create Expenses
+      await dbHelper.createExpense(expense);
+      await dbHelper.createExpense(ExpenseModel.fromEntity(
+        expense.copyWith(description: 'Another Expense'),
+      ));
+
+      // Read All Expenses
+      final expenses = await dbHelper.readAllExpenses();
+      expect(expenses.length, greaterThanOrEqualTo(2));
+    });
+
  
+
   });
 }
